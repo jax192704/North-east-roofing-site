@@ -67,7 +67,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ slug:
   const topic = topicBySlug(item.topicSlug);
   const guidance = topicGuidance[item.topicSlug];
   const related = questions.filter((question) => question.topicSlug === item.topicSlug && question.slug !== item.slug).slice(0, 5);
-  const schema = { "@context": "https://schema.org", "@type": "Article", headline: item.question, description: item.summary, mainEntityOfPage: `${site.url}/questions/${item.slug}`, author: { "@type": "Organization", name: site.operator, url: site.companyWebsite }, publisher: { "@id": `${site.url}/#publisher` }, about: topic?.name };
+  const schema = { "@context": "https://schema.org", "@type": "Article", headline: item.question, description: item.summary, mainEntityOfPage: `${site.url}/questions/${item.slug}`, datePublished: "2026-08-28", dateModified: "2026-08-28", author: { "@type": "Organization", name: site.operator, url: site.companyWebsite }, reviewedBy: { "@type": "Organization", name: site.operator, url: site.companyWebsite }, publisher: { "@id": `${site.url}/#publisher` }, about: topic?.name };
 
   return <main>
     <JsonLd data={schema}/>
@@ -79,6 +79,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ slug:
         <div className="key-answer-box"><h2>What to check next</h2><ul>{item.points.map((point) => <li key={point}><CheckCircle2/>{point}</li>)}</ul></div>
         <h2>When should you ask a roofer to inspect it?</h2><p>{guidance.inspection}</p>
         <div className="safety-note"><Info/><p><strong>Safety first:</strong> do not climb onto a roof without suitable access, training and protection. Keep clear of loose coverings, unstable ceilings and water near electrical fittings.</p></div>
+        <div className="editorial-review"><strong>Technical content review</strong><span>{site.operator} · Over 20 years of combined roofing experience</span><span>Reviewed 28 August 2026 · <Link href="/editorial-standards">How our answers are produced</Link></span></div>
         <div className="answer-quote-card"><div><p className="eyebrow">Would you like a property-specific answer?</p><h2>Request an inspection and written quotation from J&amp;L Welch.</h2><p>No deposit is required. Payment is due on completion within seven days, with the agreed scope and price confirmed in writing.</p></div><Button asChild size="lg" className="answer-accent"><Link href={`/request-a-quote?question=${encodeURIComponent(item.question)}`}>Request a quotation <ArrowRight/></Link></Button></div>
       </article>
       <aside className="answer-sidebar"><div><ShieldCheck/><h2>J&amp;L Welch Roofing</h2><p>CompetentRoofer registered, with more than 20 years of combined roofing experience and written, property-specific specifications.</p><a href={`tel:${site.phone}`}>{site.phoneDisplay}</a></div><div><MapPin/><h2>North East coverage</h2><p>Durham, Newcastle, Sunderland, Gateshead, Chester-le-Street and surrounding areas.</p><Link href="/areas">Check your area <ArrowRight/></Link></div></aside>

@@ -34,3 +34,13 @@ export const contractorApplications = sqliteTable("contractor_applications", {
   status: text("status").notNull().default("pending"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const unansweredSearches = sqliteTable("unanswered_searches", {
+  id: text("id").primaryKey(),
+  query: text("query").notNull(),
+  normalizedQuery: text("normalized_query").notNull().unique(),
+  searchCount: integer("search_count").notNull().default(1),
+  firstSeenAt: text("first_seen_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  lastSeenAt: text("last_seen_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  status: text("status").notNull().default("unreviewed"),
+});

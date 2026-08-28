@@ -1,0 +1,12 @@
+.editorial-review {
+  display: grid;
+  gap: 5px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 20px 0;
+  margin: 30px 0;
+  color: var(--muted);
+  font-size: .8rem;
+}
+.editorial-review strong { color: var(--ink); font-size: .88rem; }
+.editorial-review a { color: var(--teal); font-weight: 800; }

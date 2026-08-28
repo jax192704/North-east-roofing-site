@@ -1,4 +1,5 @@
 import { additionalQuestionSeeds, type AdditionalQuestionSeed } from "./additional-roofing-data";
+import { authorityQuestionSeeds } from "./authority-roofing-data";
 
 export const site = {
   name: "North East Roof Answers",
@@ -112,6 +113,7 @@ const seeds:QuestionSeed[]=[
   ["can-i-pressure-wash-my-roof","Can I pressure-wash roof tiles?","It is often risky. High pressure can damage surfaces, force water beneath coverings and invalidate some product guidance. A roof-specific assessment is safer.","maintenance-and-home-buying",["Do not use appearance alone to justify risk","Check manufacturer guidance","Use safe access and controlled methods"]],
   ["what-roof-documents-should-a-house-seller-provide","What roofing documents should a house seller provide?","Ideally invoices, quotations, guarantees, Building Regulations certificates, planning or conservation approvals, insurance-backed documents and maintenance records.","maintenance-and-home-buying",["Match documents to the property and work","Check whether guarantees transfer","Investigate recent work without compliance evidence"]],
   ...additionalQuestionSeeds,
+  ...authorityQuestionSeeds,
 ];
 
 export type RoofingQuestion={slug:string;question:string;summary:string;topicSlug:string;points:string[]};
