@@ -1,0 +1,6 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowRight, MapPin } from "lucide-react";
+import { areas } from "@/lib/roofing-data";
+export const metadata:Metadata={title:"North East Roofing Advice Areas",description:"Local roofing answers and direct J&L Welch quotation enquiries across Durham and the North East."};
+export default function AreasPage(){return <main><section className="page-hero"><div className="container-wide"><p className="eyebrow light">North East coverage</p><h1>Roofing answers with local context.</h1><p>Browse guidance for your nearest area, then send the property details directly to J&L Welch if an inspection or quotation is needed.</p></div></section><section className="section container-wide"><div className="area-answer-grid large">{areas.map(area=><Link href={`/areas/${area.slug}`} key={area.slug}><MapPin/><span><strong>Roofing answers for {area.name}</strong><small>{area.nearby.join(" · ")}</small></span><ArrowRight/></Link>)}</div><div className="info-callout"><h2>Elsewhere in the North East?</h2><p>J&L Welch serves Durham and the wider North East. The actual postcode, work type and survey availability determine whether the team can quote.</p><Link href="/request-a-quote">Send the postcode and question <ArrowRight/></Link></div></section></main>}
