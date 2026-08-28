@@ -1,3 +1,5 @@
+import { additionalQuestionSeeds, type AdditionalQuestionSeed } from "./additional-roofing-data";
+
 export const site = {
   name: "North East Roof Answers",
   url: "https://northeastroofanswers.co.uk",
@@ -38,7 +40,7 @@ export const topics = [
   {slug:"maintenance-and-home-buying",name:"Maintenance & buying a home",description:"Roof surveys, warning signs, maintenance schedules and questions to ask before purchase."},
 ];
 
-type QuestionSeed=[string,string,string,string,string[]];
+type QuestionSeed=AdditionalQuestionSeed;
 const seeds:QuestionSeed[]=[
   ["why-is-my-roof-leaking-only-when-it-rains-sideways","Why does my roof only leak when rain is blowing sideways?","Wind-driven rain can enter defects that remain dry in vertical rainfall, including laps, flashings, abutments, vents and cracked coverings.","leaks-and-repairs",["Note the wind direction and exact internal staining","Check junctions and penetrations, not only the area directly above","Photographs during the event can materially improve diagnosis"]],
   ["can-a-roof-leak-without-missing-tiles","Can a roof leak without any missing tiles?","Yes. Water can enter through cracked tiles, failed underlay, leadwork, valleys, ridge details, fixings, condensation or defects around penetrations.","leaks-and-repairs",["A complete-looking roof can still leak","Internal staining is not always directly below the defect","A close inspection should assess the full water path"]],
@@ -109,6 +111,7 @@ const seeds:QuestionSeed[]=[
   ["should-i-clean-moss-off-my-roof","Should moss be removed from roof tiles?","Heavy moss can hold debris and obstruct drainage, but aggressive scraping or pressure washing can damage coverings. The method must suit the roof material and condition.","maintenance-and-home-buying",["Avoid pressure washing unless specifically appropriate","Protect gutters and people below","Treat the cause of persistent shade and debris where possible"]],
   ["can-i-pressure-wash-my-roof","Can I pressure-wash roof tiles?","It is often risky. High pressure can damage surfaces, force water beneath coverings and invalidate some product guidance. A roof-specific assessment is safer.","maintenance-and-home-buying",["Do not use appearance alone to justify risk","Check manufacturer guidance","Use safe access and controlled methods"]],
   ["what-roof-documents-should-a-house-seller-provide","What roofing documents should a house seller provide?","Ideally invoices, quotations, guarantees, Building Regulations certificates, planning or conservation approvals, insurance-backed documents and maintenance records.","maintenance-and-home-buying",["Match documents to the property and work","Check whether guarantees transfer","Investigate recent work without compliance evidence"]],
+  ...additionalQuestionSeeds,
 ];
 
 export type RoofingQuestion={slug:string;question:string;summary:string;topicSlug:string;points:string[]};
