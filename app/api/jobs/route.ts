@@ -52,6 +52,19 @@ export async function POST(request: Request) {
     }, { status: 201 });
   } catch (error) {
     console.error("Quotation submission failed", error);
-    return Response.json({ error: "We could not submit the job. Please try again." }, { status: 500 });
+    const detail = error instanceof Error ? error.message : String(error);
+    const normalized = detail.toLowerCase();
+
+    if (normalized.includes("database unavailable") || normalized.includes("binding") || normalized.includes("env.db")) {
+      return Response.json({ error: "The quotation database is not connected. Reference DB01." }, { status: 503 });
+    }
+    if (normalized.includes("no such table") || normalized.includes("jobs")) {
+      return Response.json({ error: "The quotation database needs its jobs table installed. Reference DB02." }, { status: 503 });
+    }
+    if (normalized.includes("d1")) {
+      return Response.json({ error: "The quotation database rejected the request. Reference DB03." }, { status: 503 });
+    }
+
+    return Response.json({ error: "The quotation system returned an unknown server fault. Reference SYS01." }, { status: 500 });
   }
 }
