@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRight, CheckCircle2, ChevronRight, Info, MapPin, ShieldCheck } from "lucide-react";
+import { ArrowRight, CheckCircle2, ChevronRight, Clock3, ExternalLink, Info, MapPin, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { JsonLd } from "@/components/json-ld";
 import { questionBySlug, questions, site, topicBySlug } from "@/lib/roofing-data";
+import { featuredGuideBySlug } from "@/lib/featured-guides";
+import { HomeownerGuideLinks } from "@/components/homeowner-guide-links";
+import { relatedQuestions } from "@/lib/question-search";
+import { pageMetadata } from "@/lib/seo";
 
 const topicGuidance: Record<string, { practice: string; inspection: string }> = {
   "leaks-and-repairs": {
@@ -56,8 +60,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const item = questionBySlug(slug);
-  if (!item) return {};
-  return { title: item.question, description: item.summary, alternates: { canonical: `/questions/${slug}` } };
+  if (!item) notFound();
+  return pageMetadata(item.question, item.summary, `/questions/${slug}`, "article");
 }
 
 export default async function QuestionPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -66,24 +70,31 @@ export default async function QuestionPage({ params }: { params: Promise<{ slug:
   if (!item) notFound();
   const topic = topicBySlug(item.topicSlug);
   const guidance = topicGuidance[item.topicSlug];
-  const related = questions.filter((question) => question.topicSlug === item.topicSlug && question.slug !== item.slug).slice(0, 5);
-  const schema = { "@context": "https://schema.org", "@type": "Article", headline: item.question, description: item.summary, mainEntityOfPage: `${site.url}/questions/${item.slug}`, datePublished: "2026-08-28", dateModified: "2026-08-28", author: { "@type": "Organization", name: site.operator, url: site.companyWebsite }, reviewedBy: { "@type": "Organization", name: site.operator, url: site.companyWebsite }, publisher: { "@id": `${site.url}/#publisher` }, about: topic?.name };
+  const guide = featuredGuideBySlug(item.slug);
+  const related = relatedQuestions(item, questions);
+  const schema = { "@context": "https://schema.org", "@type": "Article", headline: item.question, description: item.summary, mainEntityOfPage: `${site.url}/questions/${item.slug}`, datePublished: "2026-08-28", dateModified: guide ? "2026-09-05" : "2026-08-28", author: { "@type": "Organization", name: site.operator, url: site.companyWebsite }, publisher: { "@id": `${site.url}/#publisher` }, about: topic?.name };
 
   return <main>
     <JsonLd data={schema}/>
     <div className="breadcrumb container-wide"><Link href="/">Home</Link><ChevronRight/><Link href="/questions">Questions</Link><ChevronRight/><Link href={`/topics/${topic?.slug}`}>{topic?.name}</Link></div>
-    <section className="answer-page-head"><div className="container-narrow"><p className="eyebrow">{topic?.name}</p><h1>{item.question}</h1><p className="direct-answer"><strong>Short answer:</strong> {item.summary}</p></div></section>
+    <section className="answer-page-head"><div className="container-narrow"><p className="eyebrow">{topic?.name}</p><h1>{item.question}</h1>{guide && <p className="guide-meta"><Clock3/> In-depth guide · {guide.readMinutes} minute read · Updated {guide.updated}</p>}<p className="direct-answer"><strong>Short answer:</strong> {item.summary}</p>{guide && <div className="guide-takeaway"><strong>Key takeaway</strong><span>{guide.keyTakeaway}</span></div>}</div></section>
     <section className="section container-wide answer-layout">
       <article className="answer-article">
-        <h2>What this means in practice</h2><p>{guidance.practice}</p>
+        {guide ? <>
+          {guide.sections.map(section => <section className="guide-section" key={section.heading}><h2>{section.heading}</h2>{section.paragraphs?.map(paragraph => <p key={paragraph}>{paragraph}</p>)}{section.bullets && <ul className="guide-list">{section.bullets.map(point => <li key={point}><CheckCircle2/>{point}</li>)}</ul>}</section>)}
+          {guide.priceRows && <section className="guide-section"><h2>North East price guide</h2><div className="price-table-wrap"><table className="price-table"><thead><tr><th>Work</th><th>Broad 2026 guide</th><th>Basis</th></tr></thead><tbody>{guide.priceRows.map(row => <tr key={row.item}><td>{row.item}</td><td><strong>{row.guide}</strong></td><td>{row.includes}</td></tr>)}</tbody></table></div>{guide.priceNote && <p className="price-note"><Info/>{guide.priceNote}</p>}</section>}
+          <section className="guide-section quote-checklist"><h2>What your quotation should confirm</h2><ul className="guide-list">{guide.quoteChecklist.map(point => <li key={point}><CheckCircle2/>{point}</li>)}</ul></section>
+          {guide.sources && <section className="guide-sources"><h2>Useful primary sources</h2><p>These links provide regulatory, trade-body or manufacturer information. Product guidance does not replace a property-specific specification.</p><ul>{guide.sources.map(source => <li key={source.href}><a href={source.href} rel="noreferrer" target="_blank">{source.label}<ExternalLink/></a></li>)}</ul></section>}
+        </> : <><h2>What this means in practice</h2><p>{guidance.practice}</p></>}
         <div className="key-answer-box"><h2>What to check next</h2><ul>{item.points.map((point) => <li key={point}><CheckCircle2/>{point}</li>)}</ul></div>
         <h2>When should you ask a roofer to inspect it?</h2><p>{guidance.inspection}</p>
         <div className="safety-note"><Info/><p><strong>Safety first:</strong> do not climb onto a roof without suitable access, training and protection. Keep clear of loose coverings, unstable ceilings and water near electrical fittings.</p></div>
-        <div className="editorial-review"><strong>Technical content review</strong><span>{site.operator} · Over 20 years of combined roofing experience</span><span>Reviewed 28 August 2026 · <Link href="/editorial-standards">How our answers are produced</Link></span></div>
+        <div className="editorial-review"><strong>About this guidance</strong><span>Published by {site.operator}. General information, not an assessment of your roof.</span><span>Content updated {guide?.updated ?? "28 August 2026"} · <Link href="/editorial-standards">How our answers are produced</Link></span></div>
         <div className="answer-quote-card"><div><p className="eyebrow">Would you like a property-specific answer?</p><h2>Request an inspection and written quotation from J&amp;L Welch.</h2><p>No deposit is required. Payment is due on completion within seven days, with the agreed scope and price confirmed in writing.</p></div><Button asChild size="lg" className="answer-accent"><Link href={`/request-a-quote?question=${encodeURIComponent(item.question)}`}>Request a quotation <ArrowRight/></Link></Button></div>
       </article>
       <aside className="answer-sidebar"><div><ShieldCheck/><h2>J&amp;L Welch Roofing</h2><p>CompetentRoofer registered, with more than 20 years of combined roofing experience and written, property-specific specifications.</p><a href={`tel:${site.phone}`}>{site.phoneDisplay}</a></div><div><MapPin/><h2>North East coverage</h2><p>Durham, Newcastle, Sunderland, Gateshead, Chester-le-Street and surrounding areas.</p><Link href="/areas">Check your area <ArrowRight/></Link></div></aside>
     </section>
+    <HomeownerGuideLinks topicSlug={item.topicSlug}/>
     <section className="related-section"><div className="container-wide"><p className="eyebrow">People also ask</p><h2>Related {topic?.name.toLowerCase()} questions</h2><div className="related-grid">{related.map((question) => <Link href={`/questions/${question.slug}`} key={question.slug}>{question.question}<ArrowRight/></Link>)}</div></div></section>
   </main>;
 }

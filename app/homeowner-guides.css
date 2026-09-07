@@ -1,0 +1,14 @@
+.homeowner-guide-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.homeowner-guide-grid>a{display:flex;flex-direction:column;align-items:flex-start;border:1px solid var(--line);border-top:4px solid var(--teal);background:#fff;padding:1.5rem;min-width:0}
+.homeowner-guide-grid h3{font-size:1.4rem;line-height:1.3;margin:.6rem 0}
+.homeowner-guide-grid p{font-size:1rem;line-height:1.65;color:var(--muted)}
+.homeowner-guide-grid strong{display:flex;gap:.5rem;align-items:center;margin-top:auto;color:var(--teal)}
+.homeowner-guide-links .section-heading>a{display:inline-flex;align-items:center;gap:.4rem}
+.guide-contents{padding:1.25rem 1.5rem;border:1px solid var(--line);background:#f4f7f8}
+.guide-contents h2{margin-top:0;font-size:1.3rem}
+.guide-contents ol{padding-left:1.25rem;display:grid;gap:.75rem}
+.guide-contents a{text-decoration:underline;text-underline-offset:.2em}
+.guide-section[id]{scroll-margin-top:8rem}
+.homeowner-guide-grid .eyebrow{font-size:.875rem}
+.homeowner-guide-grid>a:focus-visible,.guide-contents a:focus-visible{outline:3px solid var(--teal);outline-offset:4px}
+@media(max-width:700px){.homeowner-guide-grid{grid-template-columns:1fr}.homeowner-guide-grid>a{padding:1.15rem}.guide-contents{padding:1rem}.breadcrumb{flex-wrap:wrap}}
