@@ -72,7 +72,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ slug:
   const guidance = topicGuidance[item.topicSlug];
   const guide = featuredGuideBySlug(item.slug);
   const related = relatedQuestions(item, questions);
-  const schema = { "@context": "https://schema.org", "@type": "Article", headline: item.question, description: item.summary, mainEntityOfPage: `${site.url}/questions/${item.slug}`, datePublished: "2026-08-28", dateModified: guide ? "2026-09-05" : "2026-08-28", author: { "@type": "Organization", name: site.operator, url: site.companyWebsite }, publisher: { "@id": `${site.url}/#publisher` }, about: topic?.name };
+  const schema = { "@context": "https://schema.org", "@type": "Article", headline: item.question, description: item.summary, mainEntityOfPage: `${site.url}/questions/${item.slug}`, datePublished: "2026-08-28", dateModified: guide ? (guide.updatedISO ?? "2026-09-05") : "2026-08-28", author: { "@type": "Organization", name: site.operator, url: site.companyWebsite }, publisher: { "@id": `${site.url}/#publisher` }, about: topic?.name };
 
   return <main>
     <JsonLd data={schema}/>
