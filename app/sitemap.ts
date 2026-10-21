@@ -1,3 +1,15 @@
 import type { MetadataRoute } from "next";
 import { areas, questions, site, topics } from "@/lib/roofing-data";
-export default function sitemap():MetadataRoute.Sitemap{const fixed=["","/questions","/topics","/areas","/request-a-quote","/about","/editorial-standards","/contact","/privacy","/terms"];return [...fixed.map(path=>({url:`${site.url}${path}`,changeFrequency:path===""?"weekly" as const:"monthly" as const,priority:path===""?1:path==="/request-a-quote"?.9:.7})),...topics.map(topic=>({url:`${site.url}/topics/${topic.slug}`,changeFrequency:"monthly" as const,priority:.8})),...questions.map(question=>({url:`${site.url}/questions/${question.slug}`,changeFrequency:"monthly" as const,priority:.82})),...areas.map(area=>({url:`${site.url}/areas/${area.slug}`,changeFrequency:"monthly" as const,priority:.72}))]}
+import { homeownerGuides } from "@/lib/homeowner-guides";
+
+// Only preferred, directly accessible URLs belong in this sitemap.
+export default function sitemap(): MetadataRoute.Sitemap {
+  const fixed = ["/", "/questions", "/topics", "/guides", "/tools/compare-roofing-quotes", "/areas", "/request-a-quote", "/about", "/editorial-standards", "/contact", "/privacy", "/terms"];
+  return [
+    ...fixed.map(path => ({ url: new URL(path, site.url).href })),
+    ...topics.map(topic => ({ url: `${site.url}/topics/${topic.slug}` })),
+    ...questions.map(question => ({ url: `${site.url}/questions/${question.slug}` })),
+    ...areas.map(area => ({ url: `${site.url}/areas/${area.slug}` })),
+    ...homeownerGuides.map(guide => ({ url: `${site.url}/guides/${guide.slug}`, lastModified: "2026-09-07" })),
+  ];
+}
