@@ -5,6 +5,8 @@ import { JsonLd } from "@/components/json-ld";
 import { homeownerGuides, homeownerGuideBySlug } from "@/lib/homeowner-guides";
 import { questionBySlug, site } from "@/lib/roofing-data";
 import { pageMetadata } from "@/lib/seo";
+import { RoofVideoPlayer } from "@/components/roof-video";
+import { videoForGuide } from "@/lib/roof-videos";
 
 export const generateStaticParams = () => homeownerGuides.map(({ slug }) => ({ slug }));
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -24,6 +26,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
     <nav className="breadcrumb container-wide" aria-label="Breadcrumb"><Link href="/">Home</Link><span aria-hidden="true">/</span><Link href="/guides">Guides</Link><span aria-hidden="true">/</span><span aria-current="page">{guide.stage}</span></nav>
     <section className="answer-page-head"><div className="container-narrow"><p className="eyebrow">{guide.stage}</p><h1>{guide.title}</h1><p className="guide-meta">Published 7 September 2026 · North East Roof Answers</p><div className="guide-takeaway"><strong>Key takeaway</strong><span>{guide.takeaway}</span></div></div></section>
     <div className="section container-wide answer-layout"><article className="answer-article">
+      {videoForGuide(slug) && <RoofVideoPlayer video={videoForGuide(slug)!}/> }
       <nav className="guide-contents" aria-label="On this page"><h2>On this page</h2><ol>{guide.sections.map(section => <li key={section.id}><a href={`#${section.id}`}>{section.title}</a></li>)}</ol></nav>
       {guide.sections.map(section => <section className="guide-section" id={section.id} key={section.id}><h2>{section.title}</h2>{section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}{section.checks && <ul className="guide-list">{section.checks.map(check => <li key={check}><CheckCircle2 aria-hidden="true"/>{check}</li>)}</ul>}</section>)}
       <section className="guide-sources"><h2>Reference guidance</h2><ul>{guide.sources.map(source => <li key={source.href}><a href={source.href}>{source.label}</a></li>)}</ul><p>Published by {site.operator}. General guidance, not a survey, certification or confirmation that your roof is safe. <Link href="/editorial-standards">Sources and editorial responsibility</Link>.</p></section>

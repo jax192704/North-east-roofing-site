@@ -3,6 +3,7 @@ import test, { before, after } from "node:test";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { readdir } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 const origin = "https://northeastroofanswers.co.uk";
@@ -36,8 +37,10 @@ test("every sitemap page is 200, self-canonical, indexable and internally linked
   assert.equal(sitemapResponse.status, 200);
   const sitemap = await sitemapResponse.text();
   const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
-  assert.ok(urls.length >= 261, "Existing advice library and the two decision tools remain in the sitemap");
+  assert.ok(urls.length >= 265, "Existing advice, decision tools and four video pages remain in the sitemap");
   assert.ok(urls.includes(`${origin}/buying-a-roof`));
+  assert.ok(urls.includes(`${origin}/videos`));
+  assert.ok(urls.includes(`${origin}/videos/wet-loft`));
   assert.ok(urls.includes(`${origin}/tools/roof-problem-checker`));
   assert.equal(new Set(urls).size, urls.length, "No duplicate sitemap URLs");
   const paths = new Set(urls.map(url => new URL(url).pathname));
@@ -77,6 +80,28 @@ test("invalid page slugs return a genuine 404", { skip: !enabled }, async () => 
   for (const path of ["/missing-roof-page", "/questions/missing-roof-page", "/areas/missing-area", "/topics/missing-topic", "/guides/missing-guide"]) {
     assert.equal((await request(path)).status, 404, path);
   }
+});
+
+test("video watch pages expose playable sources, transcripts and matching metadata", { skip: !enabled }, async () => {
+  for (const [slug,seconds] of [["wet-loft",35],["repair-or-replace",34],["compare-roofing-quotes",34]]) {
+    const response=await request(`/videos/${slug}`);
+    assert.equal(response.status,200);
+    const html=await response.text();
+    assert.match(html, /<video\b[^>]*controls[^>]*preload="none"/);
+    assert.doesNotMatch(html, /<video\b[^>]*autoplay/i);
+    assert.match(html, /Read the video transcript/);
+    assert.ok(html.includes(`/videos/media/${slug}.mp4`));
+    const schemas=[...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
+    const video=schemas.find(s=>s["@type"]==="VideoObject");
+    assert.equal(video.duration,`PT${seconds}S`);
+    assert.equal(video.contentUrl,`${origin}/videos/media/${slug}.mp4`);
+    assert.equal(video.thumbnailUrl[0],`${origin}/videos/media/${slug}.jpg`);
+    assert.ok(video.transcript.length>150);
+    for(const ext of ["mp4","jpg"]) assert.ok((await readFile(new URL(`../public/videos/media/${slug}.${ext}`,import.meta.url))).length>1000);
+  }
+  assert.equal((await request("/videos/missing-video")).status,404);
+  const article=await (await request("/questions/why-is-there-condensation-in-my-loft")).text();
+  assert.ok(article.includes('/videos/media/wet-loft.mp4'));
 });
 
 test("query parameters do not become preferred indexing URLs", { skip: !enabled }, async () => {
