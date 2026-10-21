@@ -22,6 +22,7 @@ before(async () => {
     modules: ["index.js", ...files].map(file => ({ type: "ESModule", path: path.join(serverRoot, file) })),
     compatibilityDate: "2026-05-15",
     compatibilityFlags: ["nodejs_compat"],
+    r2Buckets: ["BUCKET"],
     serviceBindings: { ASSETS: () => new Response("Not found", { status: 404 }) },
   });
 });
@@ -35,7 +36,7 @@ test("every sitemap page is 200, self-canonical, indexable and internally linked
   assert.equal(sitemapResponse.status, 200);
   const sitemap = await sitemapResponse.text();
   const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
-  assert.equal(urls.length, 258);
+  assert.equal(urls.length, 259);
   assert.equal(new Set(urls).size, urls.length, "No duplicate sitemap URLs");
   const paths = new Set(urls.map(url => new URL(url).pathname));
   const incoming = new Set();

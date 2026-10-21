@@ -1,0 +1,7 @@
+import Link from 'next/link';
+import type {Metadata} from 'next';
+import {pageMetadata} from '@/lib/seo';
+import {projects} from '@/lib/project-store';
+export const dynamic='force-dynamic';
+export const metadata:Metadata=pageMetadata('Completed North East roofing projects','Finished roofing projects from J&L Welch Roofing, with approved job photographs and descriptions from across North East England.','/projects');
+export default async function Projects(){const items=await projects();return <main className="container-wide section-pad"><p className="eyebrow">OUR WORK IN THE NORTH EAST</p><h1>Completed roofing projects</h1><p className="section-intro">Real jobs from J&amp;L Welch Roofing, with finished-work photographs and an approved account of the work.</p>{items.length?<div className="project-grid">{items.map(p=><article className="project-card" key={p.key}><Link href={`/projects/${p.slug}`}><img src={`/api/project-images/${p.slug}/0`} alt={`Completed roofing work in ${p.location}`} loading="lazy"/><div><p className="eyebrow">{p.location}</p><h2>{p.title}</h2><p>{p.summary.slice(0,180)}{p.summary.length>180?'…':''}</p><span>View project →</span></div></Link></article>)}</div>:<div className="content-card"><h2>Project photographs are on their way</h2><p>Completed jobs will appear here after final review and permission to publish their photographs.</p><Link href="/request-a-quote">Tell us about your roofing work →</Link></div>}</main>}
