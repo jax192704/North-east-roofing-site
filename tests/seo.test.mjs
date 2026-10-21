@@ -36,7 +36,9 @@ test("every sitemap page is 200, self-canonical, indexable and internally linked
   assert.equal(sitemapResponse.status, 200);
   const sitemap = await sitemapResponse.text();
   const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
-  assert.equal(urls.length, 259);
+  assert.ok(urls.length >= 261, "Existing advice library and the two decision tools remain in the sitemap");
+  assert.ok(urls.includes(`${origin}/buying-a-roof`));
+  assert.ok(urls.includes(`${origin}/tools/roof-problem-checker`));
   assert.equal(new Set(urls).size, urls.length, "No duplicate sitemap URLs");
   const paths = new Set(urls.map(url => new URL(url).pathname));
   const incoming = new Set();

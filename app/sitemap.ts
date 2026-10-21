@@ -8,7 +8,7 @@ import {projects} from "@/lib/project-store";
 export const dynamic="force-dynamic";
 // Only preferred, directly accessible URLs belong in this sitemap.
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const fixed = ["/", "/projects", "/questions", "/topics", "/guides", "/tools/compare-roofing-quotes", "/areas", "/request-a-quote", "/about", "/editorial-standards", "/contact", "/privacy", "/terms"];
+  const fixed = ["/", "/projects", "/questions", "/topics", "/guides", "/buying-a-roof", "/tools/roof-problem-checker", "/tools/compare-roofing-quotes", "/areas", "/request-a-quote", "/about", "/editorial-standards", "/contact", "/privacy", "/terms"];
   const completed=await projects();
   return [
     ...completed.map(p=>({url:`${site.url}/projects/${p.slug}`,lastModified:p.approvedAt})),
