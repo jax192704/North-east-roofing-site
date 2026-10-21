@@ -1,0 +1,5 @@
+import Link from "next/link";
+import {roofVideos,videoPoster} from "@/lib/roof-videos";
+import {pageMetadata} from "@/lib/seo";
+export const metadata=pageMetadata("Short Roofing Explainer Videos","Watch short, captioned roofing explainers on damp lofts, repair versus replacement and comparing roofing quotations. Plain-English North East homeowner advice.","/videos");
+export default function VideosPage(){return <main><section className="page-hero"><div className="container-wide"><p className="eyebrow light">Straight answers in under a minute</p><h1>Short roofing explainer videos.</h1><p>Watch the key points, then explore the detailed advice. All videos have on-screen text and a written transcript.</p></div></section><section className="section container-wide roof-video-grid">{roofVideos.map(v=><article key={v.slug}><Link href={`/videos/${v.slug}`}><img src={videoPoster(v)} width="720" height="1280" alt={`Title card: ${v.title}`} loading="lazy"/><div><p className="eyebrow">{v.seconds} seconds · Captioned</p><h2>{v.title}</h2><p>{v.description}</p><strong>Watch the explainer →</strong></div></Link></article>)}</section></main>;}

@@ -9,6 +9,8 @@ import { featuredGuideBySlug } from "@/lib/featured-guides";
 import { HomeownerGuideLinks } from "@/components/homeowner-guide-links";
 import { relatedQuestions } from "@/lib/question-search";
 import { pageMetadata } from "@/lib/seo";
+import { RoofVideoPlayer } from "@/components/roof-video";
+import { videoForQuestion } from "@/lib/roof-videos";
 
 const topicGuidance: Record<string, { practice: string; inspection: string }> = {
   "leaks-and-repairs": {
@@ -80,6 +82,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ slug:
     <section className="answer-page-head"><div className="container-narrow"><p className="eyebrow">{topic?.name}</p><h1>{item.question}</h1>{guide && <p className="guide-meta"><Clock3/> In-depth guide · {guide.readMinutes} minute read · Updated {guide.updated}</p>}<p className="direct-answer"><strong>Short answer:</strong> {item.summary}</p>{guide && <div className="guide-takeaway"><strong>Key takeaway</strong><span>{guide.keyTakeaway}</span></div>}</div></section>
     <section className="section container-wide answer-layout">
       <article className="answer-article">
+        {videoForQuestion(slug) && <RoofVideoPlayer video={videoForQuestion(slug)!}/> }
         {guide ? <>
           {guide.sections.map(section => <section className="guide-section" key={section.heading}><h2>{section.heading}</h2>{section.paragraphs?.map(paragraph => <p key={paragraph}>{paragraph}</p>)}{section.bullets && <ul className="guide-list">{section.bullets.map(point => <li key={point}><CheckCircle2/>{point}</li>)}</ul>}</section>)}
           {guide.priceRows && <section className="guide-section"><h2>North East price guide</h2><div className="price-table-wrap"><table className="price-table"><thead><tr><th>Work</th><th>Broad 2026 guide</th><th>Basis</th></tr></thead><tbody>{guide.priceRows.map(row => <tr key={row.item}><td>{row.item}</td><td><strong>{row.guide}</strong></td><td>{row.includes}</td></tr>)}</tbody></table></div>{guide.priceNote && <p className="price-note"><Info/>{guide.priceNote}</p>}</section>}
