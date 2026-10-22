@@ -24,6 +24,27 @@ export async function POST(request: Request) {
       return Response.json({ error: "Please enter a valid email address and phone number." }, { status: 400 });
     }
 
+    // External Cloudflare deployments do not run the Sites migration runner.
+    // Provision the same additive schema before accepting an enquiry there.
+    // IF NOT EXISTS preserves all previously saved enquiries.
+    const database = getDatabase();
+    await database.prepare(`CREATE TABLE IF NOT EXISTS jobs (
+	id text PRIMARY KEY NOT NULL,
+	first_name text NOT NULL,
+	email text NOT NULL,
+	phone text NOT NULL,
+	postcode text NOT NULL,
+	town text DEFAULT '' NOT NULL,
+	category text NOT NULL,
+	urgency text NOT NULL,
+	property_type text NOT NULL,
+	description text NOT NULL,
+	photo_keys text DEFAULT '[]' NOT NULL,
+	consent integer DEFAULT false NOT NULL,
+	status text DEFAULT 'submitted' NOT NULL,
+	created_at text DEFAULT CURRENT_TIMESTAMP NOT NULL
+);`).run();
+
     const id = crypto.randomUUID();
     const files = form.getAll("photos").filter((item): item is File => item instanceof File && item.size > 0).slice(0, 5);
     const photoKeys: string[] = [];
@@ -42,7 +63,7 @@ export async function POST(request: Request) {
       }
     }
 
-    await getDatabase().prepare(`INSERT INTO jobs (id, first_name, email, phone, postcode, town, category, urgency, property_type, description, photo_keys, consent, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'submitted')`).bind(id, firstName, email, phone, postcode, town, category, urgency, propertyType, description, JSON.stringify(photoKeys), consent ? 1 : 0).run();
+    await database.prepare(`INSERT INTO jobs (id, first_name, email, phone, postcode, town, category, urgency, property_type, description, photo_keys, consent, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'submitted')`).bind(id, firstName, email, phone, postcode, town, category, urgency, propertyType, description, JSON.stringify(photoKeys), consent ? 1 : 0).run();
 
     return Response.json({
       id,
