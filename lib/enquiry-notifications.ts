@@ -15,13 +15,16 @@ export async function deliverEnquiryNotifications(database:D1Database,webhook:st
  RETURNING id,payload`).bind(claim,now,cutoff).all<{id:string;payload:string}>();
  for(const row of claimed.results){
   try{
-   const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:row.payload,signal:AbortSignal.timeout(20000),redirect:'error'});
-   const acknowledgement=await response.json() as {delivered?:boolean;id?:string};
+   const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:row.payload,signal:AbortSignal.timeout(20000),redirect:'manual'});
+   if(!response.ok)throw Error(`Email endpoint HTTP ${response.status}`);
+   let acknowledgement:{delivered?:boolean;id?:string};
+   try{acknowledgement=await response.json();}catch{throw Error(`Email endpoint returned a non-JSON response (HTTP ${response.status})`);}
    // Make acknowledges only after the Outlook send succeeds, never on queue acceptance.
    if(!response.ok||acknowledgement.delivered!==true||acknowledgement.id!==row.id)throw Error('Email delivery not confirmed');
    await database.prepare("UPDATE enquiry_notifications SET state='sent',sent_at=?,claim_token=NULL WHERE id=? AND claim_token=?").bind(new Date().toISOString(),row.id,claim).run();
-  }catch{
-   await database.prepare("UPDATE enquiry_notifications SET state='pending',claim_token=NULL WHERE id=? AND claim_token=?").bind(row.id,claim).run();
+  }catch(error){
+   const detail=(error instanceof Error?error.message:'Email delivery failed').replace(/https?:\/\/[^\s]+/g,'[endpoint]').slice(0,300);
+   await database.prepare("UPDATE enquiry_notifications SET state='pending',claim_token=NULL,payload=json_set(payload,'$._deliveryError',?) WHERE id=? AND claim_token=?").bind(detail,row.id,claim).run();
    console.error('Enquiry email deferred',{id:row.id});
   }
  }
