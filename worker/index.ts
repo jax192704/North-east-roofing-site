@@ -1,3 +1,4 @@
+import {deliverEnquiryNotifications} from "../lib/enquiry-notifications";
 /** Cloudflare Worker entry point for the vinext-starter template. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
@@ -5,6 +6,7 @@ import handler from "vinext/server/app-router-entry";
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  ENQUIRY_NOTIFICATION_WEBHOOK?:string;
   BUCKET: R2Bucket;
   IMAGES: {
     input(stream: ReadableStream): {
@@ -27,6 +29,9 @@ interface ExecutionContext {
 // const imageConfig: ImageConfig = { dangerouslyAllowSVG: true };
 
 const worker = {
+  async scheduled(_event:unknown,env:Env,ctx:ExecutionContext){
+    ctx.waitUntil(deliverEnquiryNotifications(env.DB,env.ENQUIRY_NOTIFICATION_WEBHOOK));
+  },
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 

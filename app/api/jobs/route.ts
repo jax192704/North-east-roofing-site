@@ -1,3 +1,5 @@
+import { env } from "cloudflare:workers";
+import {prepareEnquiryOutbox,deliverEnquiryNotifications} from "@/lib/enquiry-notifications";
 import { getDatabase, getUploads } from "@/lib/server-storage";
 
 const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]);
@@ -63,13 +65,20 @@ export async function POST(request: Request) {
       }
     }
 
-    await database.prepare(`INSERT INTO jobs (id, first_name, email, phone, postcode, town, category, urgency, property_type, description, photo_keys, consent, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'submitted')`).bind(id, firstName, email, phone, postcode, town, category, urgency, propertyType, description, JSON.stringify(photoKeys), consent ? 1 : 0).run();
+    await prepareEnquiryOutbox(database);
+    const notification=JSON.stringify({id,firstName,email,phone,postcode,town,category,urgency,propertyType,description,photoCount:photoKeys.length,submittedAt:new Date().toISOString()});
+    // Persist the enquiry and its pending notification together before delivery.
+    await database.batch([
+      database.prepare(`INSERT INTO jobs (id, first_name, email, phone, postcode, town, category, urgency, property_type, description, photo_keys, consent, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'submitted')`).bind(id, firstName, email, phone, postcode, town, category, urgency, propertyType, description, JSON.stringify(photoKeys), consent ? 1 : 0),
+      database.prepare("INSERT INTO enquiry_notifications(id,payload) VALUES (?,?)").bind(id,notification)
+    ]);
+    try{await deliverEnquiryNotifications(database,(env as unknown as {ENQUIRY_NOTIFICATION_WEBHOOK?:string}).ENQUIRY_NOTIFICATION_WEBHOOK);}catch{console.error('Enquiry email delivery deferred',{id});}
 
     return Response.json({
       id,
       message: photosNotSaved
         ? "Your enquiry has been received. Some photographs did not upload, but J&L Welch can still contact you."
-        : "Your enquiry has been sent to J&L Welch Roofing for review."
+        : "Your enquiry has been received for review by J&L Welch Roofing."
     }, { status: 201 });
   } catch (error) {
     console.error("Quotation submission failed", error);
